@@ -1,0 +1,65 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                         http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--<bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <property name="targetDataSource">
+            <bean class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+                <property name="driverClass" value="org.h2.Driver" />
+                <property name="url"
+                          value="jdbc:h2:mem:process-engine;DB_CLOSE_DELAY=1000" />
+                <property name="username" value="sa" />
+                <property name="password" value="" />
+            </bean>
+        </property>
+    </bean>-->
+    <!-- mysql 数据源 -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://127.0.0.1:3306/camunda?autoReconnect=true" />
+        <property name="username" value="zoudezhu" />
+        <property name="password" value="123456" />
+        <property name="maxIdle" value="10" />
+        <property name="minIdle" value="5" />
+        <property name="initialSize" value="10"/>
+        <property name="maxActive" value="50" />
+        <property name="maxWait" value="10000" />
+        <!-- 当连接空闲时是否测试 -->
+        <property name="testWhileIdle" value="true"></property>
+        <property name="validationQuery" value="select 1" />
+        <property name="testOnBorrow" value="true" />
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="processEngineConfiguration" class="org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration">
+        <property name="processEngineName" value="engine" />
+        <property name="dataSource" ref="dataSource" />
+        <property name="transactionManager" ref="transactionManager" />
+        <property name="databaseSchemaUpdate" value="true" />
+        <property name="jobExecutorActivate" value="false" />
+        <!--发布工作流-->
+        <!--<property name="deploymentResources" value="classpath*:*.bpmn" />-->
+        <!--<property name="history" value="audit" />-->
+    </bean>
+
+    <bean id="processEngine" class="org.camunda.bpm.engine.spring.ProcessEngineFactoryBean">
+        <property name="processEngineConfiguration" ref="processEngineConfiguration" />
+
+    </bean>
+
+    <bean id="repositoryService" factory-bean="processEngine" factory-method="getRepositoryService" />
+    <bean id="runtimeService" factory-bean="processEngine" factory-method="getRuntimeService" />
+    <bean id="taskService" factory-bean="processEngine" factory-method="getTaskService" />
+    <bean id="historyService" factory-bean="processEngine" factory-method="getHistoryService" />
+    <bean id="managementService" factory-bean="processEngine" factory-method="getManagementService" />
+
+
+    <context:annotation-config />
+    <!--<bean class="org.camunda.bpm.getstarted.loanapproval.Starter" />-->
+    <bean id="calculateInterestService" class="org.camunda.bpm.getstarted.loanapproval.CalculateInterestService" />
+</beans>
